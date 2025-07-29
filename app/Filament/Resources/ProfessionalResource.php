@@ -42,6 +42,14 @@ class ProfessionalResource extends Resource
                     ->required()
                     ->maxLength(255),
 
+                Forms\Components\Select::make('services')
+                    ->label('Serviços')
+                    ->relationship('services', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->placeholder('Selecione os serviços oferecidos'),
+
                 Forms\Components\Textarea::make('bio')
                     ->label('Biografia')
                     ->maxLength(1000)
@@ -62,6 +70,12 @@ class ProfessionalResource extends Resource
 
                 Tables\Columns\TextColumn::make('speciality')
                     ->label('Especialidades')
+                    ->badge()
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('services.name')
+                    ->label('Serviços')
                     ->badge()
                     ->searchable()
                     ->sortable(),
@@ -93,7 +107,7 @@ class ProfessionalResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ServicesRelationManager::class,
         ];
     }
 
