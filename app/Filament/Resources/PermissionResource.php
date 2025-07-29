@@ -29,8 +29,18 @@ class PermissionResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome da Permissão')
+                    ->minLength(3)
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true)
                     ->required(),
-                Forms\Components\TextInput::make('guard_name')
+
+                Forms\Components\Select::make('roles')
+                    ->label('Regras')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->searchable()
                     ->required(),
             ]);
     }
@@ -40,15 +50,25 @@ class PermissionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Permissões')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('guard_name')
+
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Regras')
+                    ->badge()
+                    ->sortable()
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Atualizado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

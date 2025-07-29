@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\UserResource\RelationManagers;
 
 class UserResource extends Resource
 {
@@ -29,13 +30,44 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome Completo')
+                    ->minLength(3)
+                    ->maxLength(255)
+                    ->placeholder('Digite o nome completo')
                     ->required(),
+
                 Forms\Components\TextInput::make('email')
+                    ->label('E-mail')
                     ->email()
                     ->required(),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
+
+
                 Forms\Components\TextInput::make('password')
+                    ->label('Senha')
                     ->password()
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
+
+                Forms\Components\TextInput::make('password_confirmation')
+                    ->label('Confirmação de Senha')
+                    ->password()
+                    ->same('password')
+                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $context): bool => $context === 'create'),
+
+                Forms\Components\Select::make('roles')
+                    ->label('Regras')
+                    ->multiple()
+                    ->relationship(
+                        'roles',
+                        'name',
+                        fn(Builder $query) =>
+                        auth()->user()->hasRole('Admin') ? null : $query->where('name', '!=', 'admin')
+                    )
+                    ->preload()
+                    ->searchable()
                     ->required(),
             ]);
     }
@@ -45,18 +77,29 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nome Completo')
+                    ->sortable()
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('email')
+                    ->label('E-mail')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Regras')
+                    ->badge()
+                    ->sortable()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Atualizado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -87,5 +130,12 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return auth()->user()->hasRole('admin')
+            ? parent::getEloquentQuery()
+            : parent::getEloquentQuery()->whereHas('roles', fn($query) => $query->where('name', '!=', 'admin'));
     }
 }

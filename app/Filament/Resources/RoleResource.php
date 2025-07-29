@@ -29,8 +29,18 @@ class RoleResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome da Regra')
+                    ->minLength(3)
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true)
                     ->required(),
-                Forms\Components\TextInput::make('guard_name')
+
+                Forms\Components\Select::make('permissions')
+                    ->label('Permissões')
+                    ->multiple()
+                    ->relationship('permissions', 'name')
+                    ->preload()
+                    ->searchable()
                     ->required(),
             ]);
     }
@@ -40,15 +50,25 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Regras')
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('guard_name')
+
+                Tables\Columns\TextColumn::make('permissions.name')
+                    ->label('Permissões')
+                    ->badge()
+                    ->sortable()
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Atualizado em')
+                    ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
