@@ -24,4 +24,9 @@ class Service extends Model
     {
         return "{$this->duration_minutes} minutes";
     }
+
+    public function professionals()
+    {
+        return $this->belongsToMany(Professional::class, 'professional_service');
+    }
 }
