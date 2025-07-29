@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasPermissionTo('access_admin');
     }
+
+    public function professional()
+    {
+        return $this->hasOne(Professional::class);
+    }
 }
