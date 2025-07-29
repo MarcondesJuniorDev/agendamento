@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ServicesRelationManager extends RelationManager
 {
     protected static string $relationship = 'services';
+    protected static ?string $title = 'Serviços';
+    protected static ?string $label = 'Serviço';
+    protected static ?string $pluralLabel = 'Serviços';
+    protected static ?string $icon = 'heroicon-o-sparkles';
 
     public function form(Form $form): Form
     {
@@ -50,7 +54,7 @@ class ServicesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('service_id')
+            ->recordTitleAttribute('service.name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Serviços')

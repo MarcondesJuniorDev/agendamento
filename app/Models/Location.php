@@ -16,4 +16,9 @@ class Location extends Model
         'state',
         'zip_code',
     ];
+
+    public function locations()
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

@@ -32,7 +32,7 @@ class ProfessionalResource extends Resource
                     ->required()
                     ->placeholder('Selecione um usuário')
                     ->relationship('user', 'name', fn($query) => $query->whereHas('roles', function ($q) {
-                        $q->where('name', 'profissional');
+                        $q->where('name', 'professional');
                     })),
 
                 Forms\Components\TextInput::make('speciality')
@@ -108,6 +108,7 @@ class ProfessionalResource extends Resource
     {
         return [
             RelationManagers\ServicesRelationManager::class,
+            RelationManagers\AppointmentsRelationManager::class,
         ];
     }
 
