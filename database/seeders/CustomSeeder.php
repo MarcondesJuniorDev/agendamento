@@ -60,7 +60,6 @@ class CustomSeeder extends Seeder
             ],
             'user' => [
                 'access_admin',
-                'read_users'
             ],
         ];
 
